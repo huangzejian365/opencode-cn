@@ -1,14 +1,12 @@
 {
   "name": "opencode-zh",
-  "version": "1.1.65",
-  "description": "OpenCode 中文版 - OpenCode Chinese Version with full Chinese UI support",
+  "version": "1.2.10",
+  "description": "OpenCode 中文翻译插件 - OpenCode Chinese Localization Plugin",
   "bin": {
-    "opencode-zh": "./bin/opencode-zh.js"
+    "opencode-zh-localize": "./localize.ts"
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall.js",
-    "localize": "bun run localize.ts",
-    "build": "cd ../packages/opencode && bun run build"
+    "localize": "bun run localize.ts"
   },
   "keywords": [
     "opencode",
@@ -35,16 +33,15 @@
     "node": ">=18.0.0"
   },
   "files": [
-    "bin/",
-    "scripts/",
     "translations/",
     "localize.ts",
-    "install.sh",
-    "update.sh",
+    "tsconfig.json",
     "README.md"
   ],
-  "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "typescript": "^5.9.3"
+  },
   "os": [
     "linux",
     "darwin",

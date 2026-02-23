@@ -1,0 +1,20 @@
+{
+  "file": "src/cli/cmd/tui/routes/session/permission.tsx",
+  "description": "权限请求组件",
+  "replacements": {
+    "title=\"Permission required\"": "title=\"需要权限\"",
+    "title=\"Always allow\"": "title=\"始终允许\"",
+    "title=\"Reject permission\"": "title=\"拒绝权限\"",
+    "options={{ once: \"Allow once\", always: \"Allow always\", reject: \"Reject\" }}": "options={{ once: \"允许一次\", always: \"始终允许\", reject: \"拒绝\" }}",
+    "options={{ confirm: \"Confirm\", cancel: \"Cancel\" }}": "options={{ confirm: \"确认\", cancel: \"取消\" }}",
+    ">Permission required</text>": ">需要权限</text>",
+    ">Reject permission</text>": ">拒绝权限</text>",
+    ">Tell OpenCode what to do differently</text>": ">告诉OpenCode该怎么做</text>",
+    "This will allow": "这将允许",
+    "until OpenCode is restarted": "直到OpenCode重启",
+    "This will allow the following patterns until OpenCode is restarted": "这将允许以下模式直到OpenCode重启",
+    ">Continue after repeated failures</text>": ">多次失败后继续</text>",
+    "Access external directory": "访问外部目录",
+    "Call tool": "调用工具"
+  }
+}

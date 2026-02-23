@@ -1,0 +1,14 @@
+{
+  "file": "src/cli/cmd/tui/routes/session/sidebar.tsx",
+  "description": "侧边栏组件",
+  "replacements": {
+    ">Context</text>": ">上下文</text>",
+    " tokens</text>": " 令牌</text>",
+    "% used</text>": "% 已使用</text>",
+    " spent</text>": " 已花费</text>",
+    ">MCP</text>": ">MCP</text>",
+    " active</span>": " 活跃</span>",
+    " error</span>": " 错误</span>",
+    " errors</span>": " 错误</span>"
+  }
+}

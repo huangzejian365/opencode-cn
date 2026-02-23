@@ -1,0 +1,7 @@
+{
+  "file": "src/cli/cmd/tui/component/prompt/autocomplete.tsx",
+  "description": "自动完成组件",
+  "replacements": {
+    "<text fg={theme.textMuted}>No matching items</text>": "<text fg={theme.textMuted}>无匹配项</text>"
+  }
+}

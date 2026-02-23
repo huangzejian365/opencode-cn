@@ -1,0 +1,7 @@
+{
+  "file": "src/cli/cmd/tui/component/tips.tsx",
+  "description": "提示信息组件",
+  "replacements": {
+    ">● Tip </text>": ">● 提示 </text>"
+  }
+}

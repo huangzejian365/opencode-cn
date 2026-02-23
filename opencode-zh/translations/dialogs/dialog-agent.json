@@ -1,0 +1,7 @@
+{
+  "file": "src/cli/cmd/tui/component/dialog-agent.tsx",
+  "description": "代理选择对话框",
+  "replacements": {
+    "title=\"Select agent\"": "title=\"选择代理\""
+  }
+}
