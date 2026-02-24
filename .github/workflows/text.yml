@@ -1,1 +1,106 @@
+name: CI
 
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    
+    - name: Install dependencies
+      run: npm ci
+      # 如果 README 中的手动安装说明要求使用 npm install，可改为 npm install
+      # 但 npm ci 更适合 CI 环境，速度更快且确定性更强
+    
+    - name: TypeScript check
+      run: npx tsc --noEmit
+      # 检查 TypeScript 类型，对应 README 中的 tsconfig.json
+    
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: Link Translation Plugin
+      run: npm link
+      # 将当前翻译插件链接到全局，使 opencode-zh-localize 命令可用
+    
+    - name: Install and Localize OpenCode
+      run: |
+        # 使用 README 推荐的 --install 参数
+        # 一键完成：下载原版源码 + 应用翻译 + 构建
+        opencode-zh-localize --install
+      shell: bash
+      timeout-minutes: 10
+    
+    - name: Verify and Launch OpenCode
+      run: |
+        # 根据 README，安装路径为 ~/.opencode-zh/opencode
+        OPENCODE_DIR="$HOME/.opencode-zh/opencode"
+        
+        if [ -d "$OPENCODE_DIR" ]; then
+          echo "✓ OpenCode 安装目录存在: $OPENCODE_DIR"
+          
+          # 检查中文翻译是否已应用
+          echo ""
+          echo "=== 验证中文翻译 ==="
+          if grep -r "选择认证方式\|API密钥\|选择提供商" "$OPENCODE_DIR" 2>/dev/null | head -3; then
+            echo "✓ 中文翻译已成功应用"
+          else
+            echo "⚠ 未找到中文翻译内容"
+          fi
+          
+          # 尝试启动 OpenCode
+          echo ""
+          echo "=== 尝试启动 OpenCode ==="
+          
+          # 首先尝试 opencode 命令
+          if command -v opencode &> /dev/null; then
+            echo "✓ opencode 命令可用"
+            opencode --version 2>/dev/null || echo "版本命令不可用"
+            opencode --help 2>/dev/null || echo "帮助命令不可用"
+          else
+            echo "⚠ opencode 命令未找到，尝试直接运行构建后的入口文件..."
+            
+            # 尝试常见的构建输出路径
+            if [ -f "$OPENCODE_DIR/dist/index.js" ]; then
+              echo "找到入口文件: $OPENCODE_DIR/dist/index.js"
+              node "$OPENCODE_DIR/dist/index.js" --version 2>/dev/null || true
+            elif [ -f "$OPENCODE_DIR/dist/cli.js" ]; then
+              echo "找到入口文件: $OPENCODE_DIR/dist/cli.js"
+              node "$OPENCODE_DIR/dist/cli.js" --version 2>/dev/null || true
+            elif [ -f "$OPENCODE_DIR/dist/opencode.js" ]; then
+              echo "找到入口文件: $OPENCODE_DIR/dist/opencode.js"
+              node "$OPENCODE_DIR/dist/opencode.js" --version 2>/dev/null || true
+            else
+              echo "✗ 未找到构建后的入口文件"
+              echo "目录内容:"
+              ls -la "$OPENCODE_DIR/" 2>/dev/null || true
+              ls -la "$OPENCODE_DIR/dist/" 2>/dev/null || true
+            fi
+          fi
+        else
+          echo "✗ OpenCode 目录不存在: $OPENCODE_DIR"
+          exit 1
+        fi
+      shell: bash
