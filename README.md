@@ -22,21 +22,21 @@ OpenCode 的中文本地化插件，为已安装的 OpenCode 提供中文界面�
 ### 方式一：NPM 安装（推荐）
 
 ```bash
-npm install -g opencode-zh
+npm install -g opencode-cn
 ```
 
 ### 方式二：Bun 安装
 
 ```bash
-bun install -g opencode-zh
+bun install -g opencode-cn
 ```
 
 ### 方式三：手动安装
 
 ```bash
 # 克隆仓库
-git clone https://github.com/opencode-zh/opencode-zh.git
-cd opencode-zh/opencode-zh
+git clone https://github.com/huangzejian365/opencode-cn.git
+cd opencode-cn
 
 # 安装依赖
 npm install
