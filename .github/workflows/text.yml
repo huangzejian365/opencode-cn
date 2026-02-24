@@ -41,15 +41,11 @@ jobs:
       with:
         bun-version: latest
     
-    - name: Link Translation Plugin
-      run: npm link
-      # 将当前翻译插件链接到全局，使 opencode-zh-localize 命令可用
-    
     - name: Install and Localize OpenCode
       run: |
-        # 使用 README 推荐的 --install 参数
-        # 一键完成：下载原版源码 + 应用翻译 + 构建
-        opencode-zh-localize --install
+        # 使用 bun 直接运行 TypeScript 脚本
+        # --install 参数一键完成：下载原版源码 + 应用翻译 + 构建
+        bun run localize.ts --install
       shell: bash
       timeout-minutes: 10
     
