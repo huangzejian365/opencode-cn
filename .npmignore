@@ -1,0 +1,50 @@
+# Git
+.git/
+.gitignore
+
+# GitHub
+.github/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Test files
+test/
+tests/
+*.test.ts
+*.spec.ts
+
+# Development files
+.env
+.env.local
+.DS_Store
+
+# Lock files (package-lock.json should be included for reproducibility)
+yarn.lock
+pnpm-lock.yaml
+
+# Documentation (README.md is included via files field)
+CHANGELOG.md
+CONTRIBUTING.md
+
+# Temporary files
+tmp/
+temp/
+*.tmp

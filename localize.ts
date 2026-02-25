@@ -1,11 +1,9 @@
 import fs from "fs"
 import path from "path"
 import os from "os"
-import { fileURLToPath } from "url"
 import { spawn, execSync } from "child_process"
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+// __dirname is available in CommonJS after compilation
 
 interface TranslationConfig {
   file?: string

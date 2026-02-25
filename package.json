@@ -1,12 +1,15 @@
 {
   "name": "opencode-cn",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "description": "OpenCode 中文翻译插件 - OpenCode Chinese Localization Plugin",
+  "main": "dist/localize.js",
   "bin": {
-    "opencode-cn-localize": "./localize.ts"
+    "opencode-cn-localize": "dist/localize.js"
   },
   "scripts": {
-    "localize": "bun run localize.ts"
+    "build": "tsc",
+    "localize": "bun run localize.ts",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "opencode",
@@ -23,7 +26,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/huangzejian365/opencode-cn"
+    "url": "git+https://github.com/huangzejian365/opencode-cn.git"
   },
   "homepage": "https://github.com/huangzejian365/opencode-cn#readme",
   "bugs": {
@@ -32,10 +35,13 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "files": [
+    "dist/",
     "translations/",
-    "localize.ts",
-    "tsconfig.json",
     "README.md"
   ],
   "devDependencies": {

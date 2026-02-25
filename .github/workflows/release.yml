@@ -1,0 +1,79 @@
+name: Release to NPM
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'package.json'
+
+jobs:
+  check-and-publish:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check if version changed
+        id: check_version
+        run: |
+          # 获取上一个版本的 package.json 中的版本号
+          git show HEAD~1:package.json > /tmp/old_package.json 2>/dev/null || echo '{"version": "0.0.0"}' > /tmp/old_package.json
+          OLD_VERSION=$(jq -r '.version' /tmp/old_package.json)
+          NEW_VERSION=$(jq -r '.version' package.json)
+
+          echo "Old version: $OLD_VERSION"
+          echo "New version: $NEW_VERSION"
+
+          if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "Version changed from $OLD_VERSION to $NEW_VERSION"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Version unchanged, skipping publish"
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies
+        if: steps.check_version.outputs.should_publish == 'true'
+        run: npm ci
+
+      - name: Build
+        if: steps.check_version.outputs.should_publish == 'true'
+        run: npm run build
+
+      - name: Publish to NPM
+        if: steps.check_version.outputs.should_publish == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.check_version.outputs.should_publish == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.check_version.outputs.version }}
+          release_name: Release v${{ steps.check_version.outputs.version }}
+          body: |
+            🎉 opencode-cn v${{ steps.check_version.outputs.version }} 已发布！
+
+            ## 安装
+            ```bash
+            npm install -g opencode-cn@${{ steps.check_version.outputs.version }}
+            ```
+
+            ## 更新日志
+            请查看 [CHANGELOG.md](CHANGELOG.md) 或提交历史。
+          draft: false
+          prerelease: false
