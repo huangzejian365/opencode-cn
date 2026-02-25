@@ -51,8 +51,8 @@ jobs:
     
     - name: Verify and Launch OpenCode
       run: |
-        # 根据 README，安装路径为 ~/.opencode-zh/opencode
-        OPENCODE_DIR="$HOME/.opencode-zh/opencode"
+        # 根据 README，安装路径为 ~/.opencode-cn/opencode
+        OPENCODE_DIR="$HOME/.opencode-cn/opencode"
         
         if [ -d "$OPENCODE_DIR" ]; then
           echo "✓ OpenCode 安装目录存在: $OPENCODE_DIR"

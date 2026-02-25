@@ -42,7 +42,7 @@ function getOpenCodeDir(): string | null {
   }
 
   const homeDir = os.homedir()
-  const defaultDir = path.join(homeDir, ".opencode-zh", "opencode")
+  const defaultDir = path.join(homeDir, ".opencode-cn", "opencode")
   
   if (fs.existsSync(defaultDir)) {
     return defaultDir
@@ -385,7 +385,7 @@ async function main() {
     log(CYAN, "╚══════════════════════════════════════════════════════════════╝\n")
     
     const homeDir = os.homedir()
-    const installDir = path.join(homeDir, ".opencode-zh", "opencode")
+    const installDir = path.join(homeDir, ".opencode-cn", "opencode")
     
     try {
       await installOpenCode(installDir)
@@ -395,7 +395,7 @@ async function main() {
       console.log("╠══════════════════════════════════════════════════════════════╣")
       console.log("║                                                              ║");
       console.log("║  下一步:                                                      ║");
-      console.log("║    opencode-zh-localize                                          ║");
+      console.log("║    opencode-cn-localize                                          ║");
       console.log("║                                                              ║");
       console.log("╚══════════════════════════════════════════════════════════════╝\n");
     } catch (error) {
@@ -416,7 +416,7 @@ async function main() {
       opencodeDir = getOpenCodeDir()
       if (!opencodeDir) {
         log(RED, "错误: 未找到 OpenCode 安装目录")
-        log(YELLOW, "请先运行: opencode-zh-localize --install")
+        log(YELLOW, "请先运行: opencode-cn-localize --install")
         process.exit(1)
         return
       }
@@ -434,7 +434,7 @@ async function main() {
       console.log("╠══════════════════════════════════════════════════════════════╣");
       console.log("║                                                              ║");
       console.log("║  下一步:                                                      ║");
-      console.log("║    opencode-zh-localize                                          ║");
+      console.log("║    opencode-cn-localize                                          ║");
       console.log("║                                                              ║");
       console.log("╚══════════════════════════════════════════════════════════════╝\n");
     } catch (error) {
@@ -455,7 +455,7 @@ async function main() {
       log(RED, "错误: 未找到 OpenCode 安装目录")
       log(YELLOW, "\n请选择以下方式之一：")
       log(YELLOW, "  1. 设置环境变量: export OPENCODE_SOURCE_DIR=/path/to/opencode")
-      log(YELLOW, "  2. 自动安装: opencode-zh-localize --install")
+      log(YELLOW, "  2. 自动安装: opencode-cn-localize --install")
       process.exit(1)
     }
     console.log(`OpenCode directory: ${opencodeDir}`)

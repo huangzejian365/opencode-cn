@@ -1,9 +1,9 @@
 {
-  "name": "opencode-zh",
+  "name": "opencode-cn",
   "version": "1.2.10",
   "description": "OpenCode 中文翻译插件 - OpenCode Chinese Localization Plugin",
   "bin": {
-    "opencode-zh-localize": "./localize.ts"
+    "opencode-cn-localize": "./localize.ts"
   },
   "scripts": {
     "localize": "bun run localize.ts"
@@ -19,15 +19,15 @@
     "cli",
     "tui"
   ],
-  "author": "opencode-zh",
+  "author": "opencode-cn",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/opencode-zh/opencode-zh"
+    "url": "https://github.com/huangzejian365/opencode-cn"
   },
-  "homepage": "https://github.com/opencode-zh/opencode-zh#readme",
+  "homepage": "https://github.com/huangzejian365/opencode-cn#readme",
   "bugs": {
-    "url": "https://github.com/opencode-zh/opencode-zh/issues"
+    "url": "https://github.com/huangzejian365/opencode-cn/issues"
   },
   "engines": {
     "node": ">=18.0.0"
