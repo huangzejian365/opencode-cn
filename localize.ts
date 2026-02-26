@@ -174,11 +174,18 @@ function installOpenCode(targetDir: string): Promise<boolean> {
       return
     }
 
+    let bunCmd = "bun"
     if (!checkCommand("bun")) {
       log(YELLOW, "未找到 Bun，正在安装...")
       try {
         execSync("npm install -g bun", { stdio: "inherit" })
         log(GREEN, "✓ Bun 安装完成\n")
+        
+        // On Windows, try to use npx bun after installation
+        if (process.platform === "win32") {
+          bunCmd = "npx bun"
+          log(YELLOW, "使用 npx bun 运行...\n")
+        }
       } catch (error) {
         log(RED, "Bun 安装失败")
         reject(error)
@@ -203,9 +210,10 @@ function installOpenCode(targetDir: string): Promise<boolean> {
       log(GREEN, "✓ 源码克隆完成\n")
 
       log(CYAN, "[3/4] 安装依赖...")
-      const installProcess = spawn("bun", ["install"], {
+      const installProcess = spawn(bunCmd.split(" ")[0], bunCmd.split(" ").slice(1).concat(["install"]), {
         cwd: targetDir,
-        stdio: "inherit"
+        stdio: "inherit",
+        shell: true
       })
 
       installProcess.on("close", (code) => {
@@ -301,9 +309,11 @@ function upgradeOpenCode(opencodeDir: string): Promise<boolean> {
           return
         }
 
-        const installProcess = spawn("bun", ["install"], {
+        const bunCmd = process.platform === "win32" && !checkCommand("bun") ? "npx bun" : "bun"
+        const installProcess = spawn(bunCmd.split(" ")[0], bunCmd.split(" ").slice(1).concat(["install"]), {
           cwd: opencodeDir,
-          stdio: "inherit"
+          stdio: "inherit",
+          shell: true
         })
 
         installProcess.on("close", (code) => {
@@ -348,10 +358,12 @@ function upgradeOpenCode(opencodeDir: string): Promise<boolean> {
 function buildOpenCode(opencodeDir: string): Promise<number> {
   return new Promise((resolve, reject) => {
     console.log("\nBuilding OpenCode...")
-    const buildProcess = spawn("bun", ["run", "build"], {
+    const bunCmd = process.platform === "win32" && !checkCommand("bun") ? "npx bun" : "bun"
+    const buildProcess = spawn(bunCmd.split(" ")[0], bunCmd.split(" ").slice(1).concat(["run", "build"]), {
       cwd: path.join(opencodeDir, "packages", "opencode"),
       stdio: "inherit",
-      env: process.env
+      env: process.env,
+      shell: true
     })
 
     buildProcess.on("close", (code) => {
