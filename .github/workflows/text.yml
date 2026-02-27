@@ -29,77 +29,52 @@ jobs:
     
     - name: Install dependencies
       run: npm ci
-      # 如果 README 中的手动安装说明要求使用 npm install，可改为 npm install
-      # 但 npm ci 更适合 CI 环境，速度更快且确定性更强
     
     - name: TypeScript check
       run: npx tsc --noEmit
-      # 检查 TypeScript 类型，对应 README 中的 tsconfig.json
     
     - name: Setup Bun
       uses: oven-sh/setup-bun@v1
       with:
         bun-version: latest
     
-    - name: Install and Localize OpenCode
+    - name: Install and Build OpenCode Chinese Version
       run: |
-        # 使用 bun 直接运行 TypeScript 脚本
-        # --install 参数完成：下载原版源码
+        # --install 现在会自动完成：克隆源码、安装依赖、应用翻译、构建二进制
         bun run localize.ts --install
-        # 安装完成后，应用中文翻译
-        bun run localize.ts --no-build
       shell: bash
-      timeout-minutes: 15
+      timeout-minutes: 20
     
-    - name: Verify and Launch OpenCode
+    - name: Verify Installation
       run: |
-        # 根据 README，安装路径为 ~/.opencode-cn/opencode
         OPENCODE_DIR="$HOME/.opencode-cn/opencode"
-        OPENCODE_BIN="$OPENCODE_DIR/packages/opencode/bin/opencode"
         
-        if [ -d "$OPENCODE_DIR" ]; then
-          echo "✓ OpenCode 安装目录存在: $OPENCODE_DIR"
-          
-          # 检查中文翻译是否已应用
-          echo ""
-          echo "=== 验证中文翻译 ==="
-          if grep -r "选择认证方式\|API密钥\|选择提供商" "$OPENCODE_DIR" 2>/dev/null | head -3; then
-            echo "✓ 中文翻译已成功应用"
-          else
-            echo "⚠ 未找到中文翻译内容"
-          fi
-          
-          # 尝试启动 OpenCode
-          echo ""
-          echo "=== 尝试启动 OpenCode ==="
-          
-          # 检查平台二进制包是否安装
-          echo "检查平台二进制包..."
-          PLATFORM="linux"
-          ARCH="x64"
-          BINARY_PKG="opencode-$PLATFORM-$ARCH"
-          
-          if [ -d "$OPENCODE_DIR/node_modules/$BINARY_PKG" ]; then
-            echo "✓ 平台二进制包已安装: $BINARY_PKG"
-          else
-            echo "⚠ 平台二进制包未找到: $BINARY_PKG"
-            echo "尝试安装平台二进制包..."
-            cd "$OPENCODE_DIR" && bun install "$BINARY_PKG" || echo "安装失败，继续尝试..."
-          fi
-          
-          # 使用 bun 运行 opencode 入口脚本
-          if [ -f "$OPENCODE_BIN" ]; then
-            echo "✓ 找到 opencode 入口脚本: $OPENCODE_BIN"
-            echo "运行 opencode --version..."
-            cd "$OPENCODE_DIR" && bun "$OPENCODE_BIN" --version 2>/dev/null || echo "版本命令执行失败"
-          else
-            echo "✗ 未找到 opencode 入口脚本"
-            echo "目录内容:"
-            ls -la "$OPENCODE_DIR/" 2>/dev/null || true
-            ls -la "$OPENCODE_DIR/packages/opencode/bin/" 2>/dev/null || true
-          fi
+        # 验证安装目录
+        if [ ! -d "$OPENCODE_DIR" ]; then
+          echo "✗ OpenCode 目录不存在"
+          exit 1
+        fi
+        echo "✓ OpenCode 安装目录: $OPENCODE_DIR"
+        
+        # 验证中文翻译
+        echo ""
+        echo "=== 验证中文翻译 ==="
+        if grep -r "选择认证方式\|API密钥\|选择提供商" "$OPENCODE_DIR" 2>/dev/null | head -3; then
+          echo "✓ 中文翻译已成功应用"
         else
-          echo "✗ OpenCode 目录不存在: $OPENCODE_DIR"
+          echo "⚠ 未找到中文翻译内容"
+        fi
+        
+        # 验证二进制文件
+        echo ""
+        echo "=== 验证二进制文件 ==="
+        BINARY="$OPENCODE_DIR/packages/opencode/node_modules/opencode-linux-x64/bin/opencode"
+        if [ -f "$BINARY" ]; then
+          echo "✓ 二进制文件存在: $BINARY"
+          "$BINARY" --version
+          echo "✓ OpenCode 运行成功！"
+        else
+          echo "✗ 二进制文件不存在"
           exit 1
         fi
       shell: bash
