@@ -1,10 +1,11 @@
 {
   "name": "opencode-cn",
-  "version": "1.2.22",
+  "version": "1.2.23",
   "description": "OpenCode 中文翻译插件 - OpenCode Chinese Localization Plugin",
   "main": "dist/localize.js",
   "bin": {
-    "opencode-cn-localize": "dist/localize.js"
+    "opencode-cn-localize": "dist/localize.js",
+    "opencode": "dist/localize.js"
   },
   "scripts": {
     "build": "tsc",

@@ -389,13 +389,78 @@ function buildOpenCode(opencodeDir) {
         });
     });
 }
+function runOpenCode(opencodeDir) {
+    const platform = process.platform;
+    const arch = process.arch;
+    const platformMap = {
+        darwin: "darwin",
+        linux: "linux",
+        win32: "windows"
+    };
+    const archMap = {
+        x64: "x64",
+        arm64: "arm64",
+        arm: "arm"
+    };
+    const platformName = platformMap[platform] || platform;
+    const archName = archMap[arch] || arch;
+    const packageName = `opencode-${platformName}-${archName}`;
+    const binaryName = platform === "win32" ? "opencode.exe" : "opencode";
+    // Find the binary
+    const possiblePaths = [
+        path_1.default.join(opencodeDir, "packages", "opencode", "node_modules", packageName, "bin", binaryName),
+        path_1.default.join(opencodeDir, "packages", "opencode", "dist", packageName, "bin", binaryName),
+    ];
+    let binaryPath = null;
+    for (const p of possiblePaths) {
+        if (fs_1.default.existsSync(p)) {
+            binaryPath = p;
+            break;
+        }
+    }
+    if (!binaryPath) {
+        log(RED, `错误: 未找到 OpenCode 二进制文件`);
+        log(YELLOW, `请先运行: opencode-cn-localize`);
+        process.exit(1);
+        return;
+    }
+    // Spawn the OpenCode process, passing all arguments
+    const args = process.argv.slice(2);
+    const child = (0, child_process_1.spawn)(binaryPath, args, {
+        stdio: "inherit",
+        env: process.env
+    });
+    child.on("close", (code) => {
+        process.exit(code || 0);
+    });
+    child.on("error", (error) => {
+        log(RED, `启动错误: ${error.message}`);
+        process.exit(1);
+    });
+}
 async function main() {
+    // Check if running as 'opencode' command (not 'opencode-cn-localize')
+    const execPath = process.argv[1] || "";
+    const isRunCommand = execPath.endsWith("opencode") ||
+        execPath.endsWith("opencode.exe") ||
+        execPath.endsWith("opencode.cmd") ||
+        execPath.includes("opencode") && !execPath.includes("opencode-cn-localize");
+    // If running as 'opencode' command, launch OpenCode directly
+    if (isRunCommand) {
+        const opencodeDir = getOpenCodeDir();
+        if (opencodeDir) {
+            runOpenCode(opencodeDir);
+            return;
+        }
+        // Fall through to show error if not installed
+    }
     console.log("OpenCode Chinese Localization Tool");
     console.log("==================================\n");
     const args = process.argv.slice(2);
     const noBuild = args.includes("--no-build");
     const upgrade = args.includes("--upgrade");
     const install = args.includes("--install");
+    const run = args.includes("--run");
     if (install) {
         log(CYAN, "╔══════════════════════════════════════════════════════════════╗");
         log(CYAN, "║           OpenCode 中文版 安装程序                           ║");
@@ -457,6 +522,18 @@ async function main() {
             log(RED, `\n升级失败: ${error.message}`);
             process.exit(1);
         }
+        return;
+    }
+    // Handle --run flag to launch OpenCode directly
+    if (run) {
+        const opencodeDir = getOpenCodeDir();
+        if (!opencodeDir) {
+            log(RED, "错误: 未找到 OpenCode 安装目录");
+            log(YELLOW, "请先运行: opencode-cn-localize --install");
+            process.exit(1);
+            return;
+        }
+        runOpenCode(opencodeDir);
         return;
     }
     if (noBuild) {
