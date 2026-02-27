@@ -474,13 +474,96 @@ async function main() {
         const installDir = path_1.default.join(homeDir, ".opencode-cn", "opencode");
         try {
             await installOpenCode(installDir);
+            // 自动继续执行翻译和构建
+            log(CYAN, "\n正在应用翻译并构建...");
+            const opencodeDir = installDir;
+            const currentVersion = getOpenCodeVersion(opencodeDir);
+            console.log(`OpenCode version: ${currentVersion}`);
+            const translationsDir = getTranslationsDir();
+            console.log(`Translations directory: ${translationsDir}\n`);
+            const moduleConfig = loadModuleConfig(translationsDir);
+            console.log(`Translation config version: ${moduleConfig.version}`);
+            if (currentVersion !== moduleConfig.version) {
+                log(YELLOW, `⚠ 版本不匹配！`);
+                log(YELLOW, `   OpenCode: ${currentVersion}`);
+                log(YELLOW, `   翻译插件: ${moduleConfig.version}`);
+                log(YELLOW, `   可能存在未翻译的内容\n`);
+            }
+            else {
+                log(GREEN, `✓ 版本匹配！OpenCode: ${currentVersion}\n`);
+            }
+            console.log("Applying translations...\n");
+            const stats = {
+                filesProcessed: 0,
+                filesSkipped: 0,
+                totalReplacements: 0,
+                errors: []
+            };
+            const processModule = (category, files) => {
+                console.log(`[${category}]`);
+                for (const file of files) {
+                    const config = loadTranslationFile(translationsDir, file);
+                    if (!config) {
+                        stats.filesSkipped++;
+                        continue;
+                    }
+                    const result = applyTranslation(opencodeDir, config);
+                    if (result.skipped) {
+                        console.log(`  ⊘ ${result.file} (${result.reason})`);
+                        stats.filesSkipped++;
+                    }
+                    else if (result.replacements > 0) {
+                        console.log(`  ✓ ${result.file} (${result.replacements} replacements)`);
+                        stats.filesProcessed++;
+                        stats.totalReplacements += result.replacements;
+                    }
+                    else {
+                        console.log(`  - ${result.file} (no matches)`);
+                        stats.filesProcessed++;
+                    }
+                }
+                console.log("");
+            };
+            const modules = moduleConfig.modules;
+            if (modules.root) {
+                processModule("root", modules.root);
+            }
+            if (modules.dialogs) {
+                processModule("dialogs", modules.dialogs);
+            }
+            if (modules.components) {
+                processModule("components", modules.components);
+            }
+            if (modules.routes) {
+                processModule("routes", modules.routes);
+            }
+            if (modules.common) {
+                processModule("common", modules.common);
+            }
+            console.log("==================================");
+            console.log(`Summary:`);
+            console.log(`  Files processed: ${stats.filesProcessed}`);
+            console.log(`  Files skipped: ${stats.filesSkipped}`);
+            console.log(`  Total replacements: ${stats.totalReplacements}`);
+            console.log("\nLocalization complete!");
+            // 构建二进制
+            try {
+                await buildOpenCode(opencodeDir);
+                console.log("\n🎉 OpenCode 中文版已准备就绪！");
+                console.log("   启动命令: opencode");
+            }
+            catch (error) {
+                console.error("\n构建失败，但翻译已完成。您可以手动运行构建命令：");
+                console.error(`  cd ${path_1.default.join(opencodeDir, "packages", "opencode")} && bun run build`);
+                process.exit(1);
+            }
             console.log("\n╔══════════════════════════════════════════════════════════════╗");
             console.log("║                    安装完成！                                ║");
             console.log("║                  Installation Complete!                      ║");
             console.log("╠══════════════════════════════════════════════════════════════╣");
             console.log("║                                                              ║");
-            console.log("║  下一步:                                                      ║");
-            console.log("║    opencode-cn-localize                                          ║");
+            console.log("║  启动命令:                                                    ║");
+            console.log("║    opencode                                                  ║");
             console.log("║                                                              ║");
             console.log("╚══════════════════════════════════════════════════════════════╝\n");
         }
