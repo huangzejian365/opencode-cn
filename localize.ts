@@ -211,13 +211,25 @@ function installOpenCode(targetDir: string): Promise<boolean> {
 
       log(CYAN, "[3/4] 安装依赖...")
       // Use --production to skip devDependencies for faster install
-      const installArgs = process.platform === "win32" 
-        ? ["install", "--production", "--ignore-scripts"]
-        : ["install", "--production"]
-      const installProcess = spawn(bunCmd.split(" ")[0], bunCmd.split(" ").slice(1).concat(installArgs), {
+      // Use --ignore-scripts to avoid husky and other prepare script errors
+      const installArgs = ["install", "--production", "--ignore-scripts"]
+      
+      // Handle both "bun" and "npx bun" cases properly
+      let cmd: string
+      let args: string[]
+      if (bunCmd.includes(" ")) {
+        // For commands like "npx bun", use shell execution
+        cmd = process.platform === "win32" ? "cmd" : "sh"
+        args = ["/c", bunCmd].concat(installArgs)
+      } else {
+        cmd = bunCmd
+        args = installArgs
+      }
+      
+      const installProcess = spawn(cmd, args, {
         cwd: targetDir,
         stdio: "inherit",
-        shell: true
+        shell: !bunCmd.includes(" ")
       })
 
       installProcess.on("close", (code) => {
