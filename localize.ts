@@ -232,6 +232,40 @@ function installOpenCode(targetDir: string): Promise<boolean> {
         return
       }
 
+      // Install platform-specific binary package
+      log(CYAN, "[3.5/4] 安装平台二进制包...")
+      try {
+        const platform = process.platform
+        const arch = process.arch
+        
+        // Map to OpenCode's package naming
+        const platformMap: Record<string, string> = {
+          darwin: "darwin",
+          linux: "linux",
+          win32: "windows"
+        }
+        const archMap: Record<string, string> = {
+          x64: "x64",
+          arm64: "arm64",
+          arm: "arm"
+        }
+        
+        const platformName = platformMap[platform] || platform
+        const archName = archMap[arch] || arch
+        const binaryPackage = `opencode-${platformName}-${archName}`
+        
+        log(YELLOW, `安装二进制包: ${binaryPackage}`)
+        execSync(`${bunCmd} install ${binaryPackage}`, {
+          cwd: targetDir,
+          stdio: "inherit",
+          env: { ...process.env }
+        })
+        log(GREEN, "✓ 平台二进制包安装完成\n")
+      } catch (error) {
+        log(YELLOW, `⚠ 平台二进制包安装失败: ${(error as Error).message}`)
+        log(YELLOW, "  尝试继续安装，可能需要手动安装二进制包\n")
+      }
+
       log(CYAN, "[4/4] 检查版本匹配...")
       
       const installedVersion = getOpenCodeVersion(targetDir)
