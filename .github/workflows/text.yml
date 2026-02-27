@@ -44,15 +44,18 @@ jobs:
     - name: Install and Localize OpenCode
       run: |
         # 使用 bun 直接运行 TypeScript 脚本
-        # --install 参数一键完成：下载原版源码 + 应用翻译 + 构建
+        # --install 参数完成：下载原版源码
         bun run localize.ts --install
+        # 安装完成后，应用中文翻译
+        bun run localize.ts --no-build
       shell: bash
-      timeout-minutes: 10
+      timeout-minutes: 15
     
     - name: Verify and Launch OpenCode
       run: |
         # 根据 README，安装路径为 ~/.opencode-cn/opencode
         OPENCODE_DIR="$HOME/.opencode-cn/opencode"
+        OPENCODE_BIN="$OPENCODE_DIR/packages/opencode/bin/opencode"
         
         if [ -d "$OPENCODE_DIR" ]; then
           echo "✓ OpenCode 安装目录存在: $OPENCODE_DIR"
@@ -70,30 +73,30 @@ jobs:
           echo ""
           echo "=== 尝试启动 OpenCode ==="
           
-          # 首先尝试 opencode 命令
-          if command -v opencode &> /dev/null; then
-            echo "✓ opencode 命令可用"
-            opencode --version 2>/dev/null || echo "版本命令不可用"
-            opencode --help 2>/dev/null || echo "帮助命令不可用"
+          # 检查平台二进制包是否安装
+          echo "检查平台二进制包..."
+          PLATFORM="linux"
+          ARCH="x64"
+          BINARY_PKG="opencode-$PLATFORM-$ARCH"
+          
+          if [ -d "$OPENCODE_DIR/node_modules/$BINARY_PKG" ]; then
+            echo "✓ 平台二进制包已安装: $BINARY_PKG"
           else
-            echo "⚠ opencode 命令未找到，尝试直接运行构建后的入口文件..."
-            
-            # 尝试常见的构建输出路径
-            if [ -f "$OPENCODE_DIR/dist/index.js" ]; then
-              echo "找到入口文件: $OPENCODE_DIR/dist/index.js"
-              node "$OPENCODE_DIR/dist/index.js" --version 2>/dev/null || true
-            elif [ -f "$OPENCODE_DIR/dist/cli.js" ]; then
-              echo "找到入口文件: $OPENCODE_DIR/dist/cli.js"
-              node "$OPENCODE_DIR/dist/cli.js" --version 2>/dev/null || true
-            elif [ -f "$OPENCODE_DIR/dist/opencode.js" ]; then
-              echo "找到入口文件: $OPENCODE_DIR/dist/opencode.js"
-              node "$OPENCODE_DIR/dist/opencode.js" --version 2>/dev/null || true
-            else
-              echo "✗ 未找到构建后的入口文件"
-              echo "目录内容:"
-              ls -la "$OPENCODE_DIR/" 2>/dev/null || true
-              ls -la "$OPENCODE_DIR/dist/" 2>/dev/null || true
-            fi
+            echo "⚠ 平台二进制包未找到: $BINARY_PKG"
+            echo "尝试安装平台二进制包..."
+            cd "$OPENCODE_DIR" && bun install "$BINARY_PKG" || echo "安装失败，继续尝试..."
+          fi
+          
+          # 使用 bun 运行 opencode 入口脚本
+          if [ -f "$OPENCODE_BIN" ]; then
+            echo "✓ 找到 opencode 入口脚本: $OPENCODE_BIN"
+            echo "运行 opencode --version..."
+            cd "$OPENCODE_DIR" && bun "$OPENCODE_BIN" --version 2>/dev/null || echo "版本命令执行失败"
+          else
+            echo "✗ 未找到 opencode 入口脚本"
+            echo "目录内容:"
+            ls -la "$OPENCODE_DIR/" 2>/dev/null || true
+            ls -la "$OPENCODE_DIR/packages/opencode/bin/" 2>/dev/null || true
           fi
         else
           echo "✗ OpenCode 目录不存在: $OPENCODE_DIR"

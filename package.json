@@ -52,5 +52,8 @@
     "linux",
     "darwin",
     "win32"
-  ]
+  ],
+  "dependencies": {
+    "opencode-windows-x64": "^1.2.15"
+  }
 }
