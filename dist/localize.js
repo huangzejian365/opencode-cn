@@ -182,7 +182,7 @@ function installOpenCode(targetDir) {
                 reject(error);
                 return;
             }
-            // Install platform-specific binary package
+            // Install platform-specific binary package (without saving to package.json)
             log(CYAN, "[3.5/4] 安装平台二进制包...");
             try {
                 const platform = process.platform;
@@ -202,7 +202,8 @@ function installOpenCode(targetDir) {
                 const archName = archMap[arch] || arch;
                 const binaryPackage = `opencode-${platformName}-${archName}`;
                 log(YELLOW, `安装二进制包: ${binaryPackage}`);
-                (0, child_process_1.execSync)(`${bunCmd} install ${binaryPackage}`, {
+                // Use --no-save to avoid modifying package.json with platform-specific dependency
+                (0, child_process_1.execSync)(`${bunCmd} install ${binaryPackage} --no-save`, {
                     cwd: targetDir,
                     stdio: "inherit",
                     env: { ...process.env }

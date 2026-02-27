@@ -232,7 +232,7 @@ function installOpenCode(targetDir: string): Promise<boolean> {
         return
       }
 
-      // Install platform-specific binary package
+      // Install platform-specific binary package (without saving to package.json)
       log(CYAN, "[3.5/4] 安装平台二进制包...")
       try {
         const platform = process.platform
@@ -255,7 +255,8 @@ function installOpenCode(targetDir: string): Promise<boolean> {
         const binaryPackage = `opencode-${platformName}-${archName}`
         
         log(YELLOW, `安装二进制包: ${binaryPackage}`)
-        execSync(`${bunCmd} install ${binaryPackage}`, {
+        // Use --no-save to avoid modifying package.json with platform-specific dependency
+        execSync(`${bunCmd} install ${binaryPackage} --no-save`, {
           cwd: targetDir,
           stdio: "inherit",
           env: { ...process.env }
